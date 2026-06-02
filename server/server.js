@@ -7,7 +7,6 @@ const os = require('os');
 
 const app = express();
 const PORT = 3001;
-const CLIENT_PORT = 5173; // 前端开发服务器端口
 
 // 中间件配置
 app.use(cors());
@@ -65,8 +64,8 @@ app.get('/api/network-info', (req, res) => {
 
   res.json({
     ip: localIP,
-    port: CLIENT_PORT,
-    url: `http://${localIP}:${CLIENT_PORT}`
+    port: PORT,
+    url: `http://${localIP}:${PORT}`
   });
 });
 
@@ -119,8 +118,12 @@ app.get('/api/files', (req, res) => {
 /**
  * 文件下载
  */
-app.get('/api/download/:filename', (req, res) => {
-  const filename = req.params.filename;
+app.get('/api/download', (req, res) => {
+  const filename = req.query.filename;
+  if (!filename) {
+    return res.status(400).json({ error: '请提供文件名' });
+  }
+
   const filePath = path.join(UPLOADS_DIR, filename);
 
   if (!fs.existsSync(filePath)) {
@@ -129,14 +132,28 @@ app.get('/api/download/:filename', (req, res) => {
 
   // 获取原始文件名（移除时间戳）
   const originalName = filename.replace(/^\d+-/, '');
-  res.download(filePath, originalName);
+  
+  console.log(`下载文件: ${filename} -> ${originalName}`);
+  
+  // 设置正确的Content-Disposition头，处理中文文件名
+  const encodedFileName = encodeURIComponent(originalName);
+  res.setHeader('Content-Disposition', `attachment; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  
+  // 使用更可靠的流式下载
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.pipe(res);
 });
 
 /**
  * 删除文件
  */
-app.delete('/api/files/:filename', (req, res) => {
-  const filename = req.params.filename;
+app.delete('/api/files', (req, res) => {
+  const filename = req.query.filename;
+  if (!filename) {
+    return res.status(400).json({ error: '请提供文件名' });
+  }
+
   const filePath = path.join(UPLOADS_DIR, filename);
 
   if (!fs.existsSync(filePath)) {
@@ -199,9 +216,24 @@ app.delete('/api/texts', (req, res) => {
 // 静态文件服务 - 生产环境
 if (process.env.NODE_ENV === 'production') {
   const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
-  app.use(express.static(clientBuildPath));
+  // 完全禁用缓存
+  app.use(express.static(clientBuildPath, {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
+    res.sendFile(path.join(clientBuildPath, 'index.html'), {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
   });
 }
 

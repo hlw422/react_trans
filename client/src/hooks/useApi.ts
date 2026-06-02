@@ -50,18 +50,43 @@ export const getFiles = async (): Promise<FileInfo[]> => {
 };
 
 // 下载文件
-export const downloadFile = (filename: string): void => {
-  const link = document.createElement('a');
-  link.href = `/api/download/${encodeURIComponent(filename)}`;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+export const downloadFile = async (filename: string): Promise<void> => {
+  const encodedFilename = encodeURIComponent(filename);
+  const url = `/api/download?filename=${encodedFilename}`;
+  const originalName = filename.replace(/^\d+-/, '');
+  
+  try {
+    // 使用fetch API下载
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('下载失败');
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = originalName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('下载出错:', error);
+    // 如果fetch失败，回退到简单链接方式
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = originalName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 };
 
 // 删除文件
 export const deleteFile = async (filename: string): Promise<void> => {
-  await api.delete(`/files/${encodeURIComponent(filename)}`);
+  const encodedFilename = encodeURIComponent(filename);
+  await api.delete(`/files?filename=${encodedFilename}`);
 };
 
 // 获取共享文本列表

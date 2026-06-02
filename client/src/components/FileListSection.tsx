@@ -26,12 +26,21 @@ export function FileListSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleDownload = (filename: string) => {
-    downloadFile(filename);
-    toast({
-      title: '开始下载',
-      description: '文件正在下载中...',
-    });
+  const handleDownload = async (filename: string) => {
+    try {
+      toast({
+        title: '开始下载',
+        description: '文件正在下载中...',
+      });
+      await downloadFile(filename);
+    } catch (error) {
+      console.error('下载文件出错:', error);
+      toast({
+        title: '下载失败',
+        description: '文件下载失败，请重试',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleDelete = async (filename: string) => {
