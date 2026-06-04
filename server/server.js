@@ -7,6 +7,7 @@ const os = require('os');
 
 const app = express();
 const PORT = 3001;
+const CLIENT_PORT = 5174;
 
 // 中间件配置
 app.use(cors());
@@ -64,8 +65,8 @@ app.get('/api/network-info', (req, res) => {
 
   res.json({
     ip: localIP,
-    port: PORT,
-    url: `http://${localIP}:${PORT}`
+    port: CLIENT_PORT,
+    url: `http://${localIP}:${CLIENT_PORT}`
   });
 });
 

@@ -53,7 +53,23 @@ export function TextShareSection() {
 
   const handleCopy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      // 优先使用 Clipboard API（需要 HTTPS 或 localhost）
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级方案：使用临时 textarea + execCommand（兼容手机端 HTTP 访问）
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (!success) throw new Error('execCommand copy failed');
+      }
       toast({
         title: '已复制',
         description: '文本已复制到剪贴板',
