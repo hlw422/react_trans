@@ -6,7 +6,7 @@ const fs = require('fs');
 const os = require('os');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3009;
 const CLIENT_PORT = 5174;
 
 // 中间件配置
@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB 限制
+    fileSize: 10 * 1024 * 1024 * 1024 // 10GB 限制
   }
 });
 
