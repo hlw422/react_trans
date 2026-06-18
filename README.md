@@ -79,7 +79,7 @@ cd server
 node server.js
 ```
 
-后端服务将在 http://localhost:3001 启动
+后端服务将在 http://localhost:3009 启动
 
 #### 4. 启动前端服务（新终端）
 
@@ -144,7 +144,7 @@ npm run dev
 ### Q: 文件上传失败？
 
 **A:** 请检查：
-1. 文件大小是否超过100MB限制
+1. 文件大小是否超过10GB限制
 2. 网络连接是否稳定
 3. 服务器是否有写入权限
 
@@ -153,7 +153,7 @@ npm run dev
 **A:** 编辑 `server/server.js` 文件，修改 `PORT` 变量：
 
 ```javascript
-const PORT = 3001; // 修改为其他端口
+const PORT = 3009; // 修改为其他端口
 ```
 
 同时需要修改 `client/vite.config.ts` 中的代理配置：
@@ -183,6 +183,21 @@ NODE_ENV=production node server.js
 
 生产环境下，前端静态文件将由 Express 托管。
 
+### Q: 如何使用 Docker 部署？
+
+**A:** 确保已安装 Docker 和 Docker Compose，然后执行：
+
+```bash
+# Linux/macOS
+chmod +x deploy.sh
+./deploy.sh
+
+# Windows (PowerShell)
+docker-compose up -d --build
+```
+
+部署成功后访问 http://localhost:3009 即可使用。
+
 ## 📁 项目结构
 
 ```
@@ -211,6 +226,9 @@ react_trans/
 │   └── uploads/                      # 文件存储目录
 ├── start.bat                         # Windows 启动脚本
 ├── start.sh                          # macOS/Linux 启动脚本
+├── Dockerfile                        # Docker 构建文件
+├── docker-compose.yml                # Docker Compose 编排文件
+├── deploy.sh                         # Docker 一键部署脚本
 └── README.md                         # 本文档
 ```
 

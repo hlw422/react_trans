@@ -1,0 +1,43 @@
+# 依赖目录
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# 构建产物
+client/dist/
+client/build/
+
+# 上传文件
+server/uploads/*
+!server/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# 文档
+README.md
+*.md
+
+# 启动脚本
+start.bat
+start.sh
+deploy.sh
+
+# Docker 文件
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 其他
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
